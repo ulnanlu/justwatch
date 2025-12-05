@@ -52,7 +52,7 @@
 		</div>
 	{:else if searchResponse}
 		<div class="overflow-x-auto">
-			<Table striped={true} hoverable={true} color="custom" class="dark-table">
+			<Table striped={true} hoverable={true} class="dark-table">
 				<TableHead class="dark-table-head">
 					<TableHeadCell>Type</TableHeadCell>
 					<TableHeadCell>Title</TableHeadCell>

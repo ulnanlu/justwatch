@@ -1,0 +1,29 @@
+# Node
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs (will be built in Docker)
+.svelte-kit/
+build/
+.output/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git
+.gitignore
+
+# Testing
+coverage/
+
+# Misc
+*.md
+*.log
+.env
+.env.local

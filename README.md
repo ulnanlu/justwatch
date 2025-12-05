@@ -1,65 +1,92 @@
-# JustWatch Search Application
+# JustWatch Search
 
-A full-stack application for searching movies and TV shows on JustWatch and viewing streaming offers across all countries.
-
-## Project Structure
-
-- **Backend**: FastAPI application (Python 3.14+, uv)
-- **Frontend**: SvelteKit with Flowbite UI components (pnpm)
+A full-stack application for searching movies and TV shows and finding where to stream them across multiple countries using the JustWatch API.
 
 ## Features
 
-- 🔍 Search for movies and TV shows using JustWatch's API
-- 🌍 View offers across all available countries
-- 💰 Currency conversion to USD for price comparison
-- 🎬 Detailed title information (cast, genres, release date, etc.)
-- 🔗 Direct links to streaming providers
-- 📱 Responsive design with Flowbite components
+- 🔍 Search for movies and TV shows
+- 🌍 View streaming offers across 30+ countries
+- 💰 Compare prices with automatic USD conversion
+- 🎬 Detailed information including genres, runtime, ratings
+- 🎨 Modern UI with dark mode
+- 📊 Sortable and filterable offers table
+- 🔗 Direct links to streaming platforms
 
-## Backend (FastAPI)
+## Tech Stack
 
-### Setup
+### Backend
+- **FastAPI** - Modern Python web framework
+- **uv** - Fast Python package manager
+- **httpx** - Async HTTP client
+- **Pydantic** - Data validation
+
+### Frontend
+- **SvelteKit** - Web framework
+- **TypeScript** - Type safety
+- **Flowbite** - UI components
+- **Vite** - Build tool
+- **pnpm** - Package manager
+
+## Quick Start
+
+### Using Docker Compose (Recommended)
 
 ```bash
-cd backend
-uv sync
+# Start both backend and frontend
+docker-compose up -d
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
 ```
 
-### Run Development Server
+### Manual Setup
+
+#### Backend
 
 ```bash
 cd backend
+
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate
+uv pip install -r pyproject.toml
+
+# Run the server
 uv run fastapi dev main.py
 ```
 
 The API will be available at `http://localhost:8000`
 
-### API Documentation
+#### API Documentation
 
-Once the server is running, visit:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-### API Endpoints
+#### API Endpoints
 
 - `GET /api/justwatch/search?q={query}&country={country}` - Search for titles
 - `GET /api/justwatch/title/{node_id}` - Get title details
 - `GET /api/justwatch/offers/{node_id}?path={path}` - Get offers for a title
 - `GET /api/justwatch/locales?path={path}` - Get available locales
 
+
 ## Frontend (SvelteKit)
 
-### Setup
-
 ```bash
 cd frontend
+
+# Install pnpm if not already installed
+npm install -g pnpm
+
+# Install dependencies
 pnpm install
-```
 
-### Run Development Server
-
-```bash
-cd frontend
+# Run the dev server
 pnpm dev
 ```
 
@@ -71,6 +98,44 @@ The app will be available at `http://localhost:5173`
 cd frontend
 pnpm build
 pnpm preview
+```
+
+## Docker Images
+
+Pre-built Docker images are automatically published to GitHub Container Registry:
+
+```bash
+# Pull the latest images
+docker pull ghcr.io/ulnanlu/justwatch-backend:latest
+docker pull ghcr.io/ulnanlu/justwatch-frontend:latest
+
+# Or use specific versions
+docker pull ghcr.io/ulnanlu/justwatch-backend:v1.0.0
+docker pull ghcr.io/ulnanlu/justwatch-frontend:v1.0.0
+```
+
+## Development
+
+### Backend Structure
+```
+backend/
+├── main.py                 # FastAPI application
+├── app/
+│   ├── api/               # API routes
+│   ├── models/            # Pydantic models
+│   └── services/          # Business logic
+└── pyproject.toml         # Dependencies
+```
+
+### Frontend Structure
+```
+frontend/
+├── src/
+│   ├── lib/
+│   │   ├── api/          # API client
+│   │   └── components/   # Svelte components
+│   └── routes/           # SvelteKit routes
+└── package.json
 ```
 
 ## How It Works
@@ -86,6 +151,19 @@ The original project used client-side requests with CORS proxies. This implement
 - ✅ Uses server-side requests (no CORS issues)
 - ✅ Implements a robust REST API with FastAPI
 - ✅ Better error handling and type safety
+- ✅ Docker support for easy deployment
+- ✅ Automated CI/CD with GitHub Actions
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
 - ✅ Cleaner separation of concerns
 - ✅ No dependency on third-party CORS proxies
 
