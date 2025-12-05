@@ -1,6 +1,6 @@
 # Combined Backend + Frontend Dockerfile
 # Stage 1: Build frontend
-FROM node:20-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 
 WORKDIR /frontend
 
@@ -20,7 +20,7 @@ COPY frontend ./
 RUN pnpm run build
 
 # Stage 2: Backend with static files
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 
