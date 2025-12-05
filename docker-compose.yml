@@ -1,32 +1,12 @@
 services:
-  backend:
-    image: ghcr.io/ulnanlu/justwatch-backend:latest
+  app:
+    image: ghcr.io/ulnanlu/justwatch:latest
     # Uncomment to build locally instead:
     # build:
-    #   context: ./backend
-    #   dockerfile: Dockerfile
+    #   context: .
+    #   dockerfile: ./backend/Dockerfile
     ports:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
-    networks:
-      - justwatch-network
-
-  frontend:
-    image: ghcr.io/ulnanlu/justwatch-frontend:latest
-    # Uncomment to build locally instead:
-    # build:
-    #   context: ./frontend
-    #   dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-    restart: unless-stopped
-    networks:
-      - justwatch-network
-
-networks:
-  justwatch-network:
-    driver: bridge

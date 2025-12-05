@@ -32,12 +32,10 @@ A full-stack application for searching movies and TV shows and finding where to 
 ### Using Docker Compose (Recommended)
 
 ```bash
-# Start both backend and frontend
+# Start the application
 docker-compose up -d
 
-# Access the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000
+# Access the application at http://localhost:8000
 # API Docs: http://localhost:8000/docs
 ```
 
@@ -105,13 +103,14 @@ pnpm preview
 Pre-built Docker images are automatically published to GitHub Container Registry:
 
 ```bash
-# Pull the latest images
-docker pull ghcr.io/ulnanlu/justwatch-backend:latest
-docker pull ghcr.io/ulnanlu/justwatch-frontend:latest
+# Pull the latest image
+docker pull ghcr.io/ulnanlu/justwatch:latest
 
-# Or use specific versions
-docker pull ghcr.io/ulnanlu/justwatch-backend:v1.0.0
-docker pull ghcr.io/ulnanlu/justwatch-frontend:v1.0.0
+# Run it
+docker run -p 8000:8000 ghcr.io/ulnanlu/justwatch:latest
+
+# Or use a specific version
+docker pull ghcr.io/ulnanlu/justwatch:v1.0.0
 ```
 
 ## Development

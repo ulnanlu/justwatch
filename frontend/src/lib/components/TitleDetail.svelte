@@ -67,6 +67,18 @@
 			.join(', ');
 	}
 	
+	function getQualityRank(quality: string | undefined): number {
+		if (!quality) return 0;
+		
+		const q = quality.toUpperCase();
+		
+		// Higher number = better quality
+		if (q.includes('4K') || q.includes('UHD')) return 5;
+		if (q.includes('HD')) return 4;
+		if (q.includes('SD')) return 3;
+		return 2; // Unknown/other formats
+	}
+	
 	function sortOffers(column: string) {
 		if (sortColumn === column) {
 			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -100,8 +112,8 @@
 					bVal = b.normalizedPrice || 0;
 					break;
 				case 'quality':
-					aVal = a.presentationType || '';
-					bVal = b.presentationType || '';
+					aVal = getQualityRank(a.presentationType);
+					bVal = getQualityRank(b.presentationType);
 					break;
 				default:
 					return 0;
@@ -149,11 +161,13 @@
 			offersLoading = true;
 			try {
 				offers = await justWatchAPI.getTitleOffers(title.id, title.content.fullPath);
-				filteredOffers = offers;
 				
 				// Log unique monetization types for debugging
 				const types = new Set(offers.map(o => o.monetizationType).filter(Boolean));
 				console.log('Available monetization types:', Array.from(types));
+				
+				// Apply filters immediately after loading
+				applyFilters();
 			} catch (error) {
 				console.error('Failed to load offers:', error);
 			} finally {
@@ -282,10 +296,24 @@
 		
 		<!-- Offers Section -->
 		<div class="offers-section w-full">
-			<h2 class="text-3xl font-bold mb-6 text-white flex items-center gap-3">
-				<span class="text-4xl">🎬</span>
-				Where to Watch
-			</h2>
+			<div class="flex items-center justify-between mb-6">
+				<h2 class="text-3xl font-bold text-white flex items-center gap-3">
+					<span class="text-4xl">🎬</span>
+					Where to Watch
+				</h2>
+				{#if !offersLoading && offers.length > 0}
+					<div class="flex items-center gap-2">
+						<Badge color="indigo" class="text-base font-semibold">
+							{filteredOffers.length} {filteredOffers.length === 1 ? 'offer' : 'offers'}
+						</Badge>
+						{#if filteredOffers.length !== offers.length}
+							<span class="text-sm text-gray-400" title="Cinema/theater releases are filtered out">
+								({offers.length - filteredOffers.length} filtered)
+							</span>
+						{/if}
+					</div>
+				{/if}
+			</div>
 			
 			{#if offersLoading}
 				<div class="flex justify-center items-center py-12">
