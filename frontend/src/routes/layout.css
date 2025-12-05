@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@plugin 'flowbite/plugin';
+@custom-variant dark (&:where(.dark, .dark *));
+/* ... */
+@source "../../node_modules/flowbite-svelte/dist";
+@source "../../node_modules/flowbite-svelte-icons/dist";
+
+body {
+	background: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+	min-height: 100vh;
+	margin: 0;
+}
