@@ -2,7 +2,7 @@
  * API client for JustWatch backend
  */
 
-const API_BASE_URL = 'http://localhost:8000/api/justwatch';
+const API_BASE_URL = '/api/justwatch';
 
 export interface ExternalIds {
 	imdbId?: string;

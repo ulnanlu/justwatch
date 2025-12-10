@@ -2,6 +2,10 @@
 
 A full-stack application for searching movies and TV shows and finding where to stream them across multiple countries using the JustWatch API.
 
+**Screenshots**
+- ![Title Detail](docs/assets/title-detail.png)
+- ![Search Page](docs/assets/search-page.png)
+
 ## Features
 
 - 🔍 Search for movies and TV shows
