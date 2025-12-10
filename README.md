@@ -7,10 +7,10 @@ A full-stack application for searching movies and TV shows and finding where to 
 	<summary>Click to view screenshots</summary>
 
   
-   ### Search Page
-	![Search Page](docs/assets/_home.png)
-   ### Title Details Page
-	![Title Detail](docs/assets/_title_page.png)
+#### Search Page
+![Search Page](docs/assets/_home.png)
+#### Title Details Page
+![Title Detail](docs/assets/_title_page.png)
 
 </details>
 
