@@ -6,7 +6,7 @@ services:
     #   context: .
     #   dockerfile: ./backend/Dockerfile
     ports:
-      - "8000:8000"
+      - "43434:43434"
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
