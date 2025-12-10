@@ -1,0 +1,11 @@
+services:
+  justwatch-dev:
+    container_name: justwatch-dev
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "43435:43434"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

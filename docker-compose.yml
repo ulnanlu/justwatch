@@ -1,10 +1,7 @@
 services:
-  app:
+  justwatch:
+    container_name: justwatch
     image: ghcr.io/ulnanlu/justwatch:latest
-    # Uncomment to build locally instead:
-    # build:
-    #   context: .
-    #   dockerfile: ./backend/Dockerfile
     ports:
       - "43434:43434"
     environment:

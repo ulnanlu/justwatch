@@ -18,6 +18,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
+      digest: ${{ steps.buildpush.outputs.digest }}
 
     steps:
       - name: Checkout repository
@@ -46,6 +49,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
+        id: buildpush
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -55,6 +59,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Compute short SHA
+        id: vars
+        run: |
+          echo "sha_short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
   smoke-test:
     name: Smoke Test API Health
@@ -73,11 +82,11 @@ jobs:
 
       - name: Pull image for this commit
         run: |
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }}
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ needs.build.outputs.sha_short }}
 
       - name: Run container
         run: |
-          docker run -d --rm --name justwatch-api -p 43434:43434 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }}
+          docker run -d --rm --name justwatch-api -p 43434:43434 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ needs.build.outputs.sha_short }}
 
       - name: Wait for health endpoint
         run: |
