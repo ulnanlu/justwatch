@@ -5,6 +5,28 @@
   ],
   "automerge": false,
   "dependencyDashboard": true,
+  "packageRules": [
+    {
+      "description": "Group Python dependency updates",
+      "matchManagers": ["uv"],
+      "groupName": "Python dependencies"
+    },
+    {
+      "description": "Group npm dependency updates",
+      "matchManagers": ["npm"],
+      "groupName": "npm dependencies"
+    },
+    {
+      "description": "Group Docker image updates",
+      "matchManagers": ["dockerfile"],
+      "groupName": "Docker dependencies"
+    },
+    {
+      "description": "Group GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    }
+  ],
   "schedule": [
     "every weekend"
   ],
