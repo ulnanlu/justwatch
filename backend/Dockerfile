@@ -20,7 +20,7 @@ COPY frontend ./
 RUN pnpm run build
 
 # Stage 2: Backend with static files
-FROM python:3.14-slim
+FROM python:3.15-slim
 
 WORKDIR /app
 
