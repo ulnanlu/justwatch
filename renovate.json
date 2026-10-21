@@ -3,16 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "packageRules": [
-    {
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "matchCurrentVersion": "!/^0/",
-      "automerge": true
-    }
-  ],
+  "automerge": false,
   "dependencyDashboard": true,
   "schedule": [
     "every weekend"
