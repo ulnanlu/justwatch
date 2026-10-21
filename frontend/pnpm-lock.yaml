@@ -43,7 +43,7 @@ importers:
         version: 3.13.0(eslint@9.39.1(jiti@2.6.1)(supports-color@7.2.0))(svelte@5.45.5)
       flowbite:
         specifier: ^4.0.1
-        version: 4.0.1(rollup@4.53.3)
+        version: 4.0.2(rollup@4.53.3)
       flowbite-svelte:
         specifier: ^1.29.1
         version: 1.29.1(rollup@4.53.3)(svelte@5.45.5)(tailwindcss@4.1.17)
@@ -948,8 +948,8 @@ packages:
   flowbite@3.1.2:
     resolution: {integrity: sha512-MkwSgbbybCYgMC+go6Da5idEKUFfMqc/AmSjm/2ZbdmvoKf5frLPq/eIhXc9P+rC8t9boZtUXzHDgt5whZ6A/Q==}
 
-  flowbite@4.0.1:
-    resolution: {integrity: sha512-UwUjvnqrQTiFm3uMJ0WWnzKXKoDyNyfyEzoNnxmZo6KyDzCedjqZw1UW0Oqdn+E0iYVdPu0fizydJN6e4pP9Rw==}
+  flowbite@4.0.2:
+    resolution: {integrity: sha512-TxBdfZpd3HktHH4ashiYjirrSZeVPtG1OCRZMKTeXUa9FOlMxSF98zgjMB/AxE49KZ+rlfgWynAlaNpWxrqZmA==}
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -2335,7 +2335,7 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  flowbite@4.0.1(rollup@4.53.3):
+  flowbite@4.0.2(rollup@4.53.3):
     dependencies:
       '@popperjs/core': 2.11.8
       flowbite-datepicker: 2.0.0(rollup@4.53.3)
