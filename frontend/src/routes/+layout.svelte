@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import { resolve } from '$app/paths';
 
 	let { children } = $props();
 </script>
@@ -12,12 +13,12 @@
 <div class="app">
 	<nav class="navbar">
 		<div class="container">
-			<a href="/" class="brand">
+			<a href={resolve('/')} class="brand">
 				<span class="logo">🎬</span>
 				JustWatch Search
 			</a>
 			<div class="nav-items">
-				<a href="/search" class="nav-link">Search</a>
+				<a href={resolve('/search')} class="nav-link">Search</a>
 			</div>
 		</div>
 	</nav>

@@ -1,26 +1,37 @@
 <script lang="ts">
-	import { Input, Button, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Spinner, Badge } from 'flowbite-svelte';
-	import { SearchOutline } from 'flowbite-svelte-icons';
-	import { justWatchAPI, type SearchTitlesResponse, type TitleNode } from '$lib/api/justwatch';
+	import {
+		Input,
+		Button,
+		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell,
+		Spinner,
+		Badge
+	} from 'flowbite-svelte';
+	import { resolve } from '$app/paths';
+	import { justWatchAPI, type SearchTitlesResponse } from '$lib/api/justwatch';
 	import { onMount } from 'svelte';
-	
+
 	let searchQuery = '';
 	let searchResponse: SearchTitlesResponse | null = null;
 	let loading = false;
-	
+
 	onMount(() => {
 		searchMovies('');
 	});
-	
+
 	let debounceTimer: ReturnType<typeof setTimeout>;
-	
+
 	function handleInput() {
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
 			searchMovies(searchQuery);
 		}, 300);
 	}
-	
+
 	async function searchMovies(query: string) {
 		loading = true;
 		try {
@@ -35,7 +46,7 @@
 
 <div class="container mx-auto p-6">
 	<h1 class="text-3xl font-bold mb-6 text-white">JustWatch Search</h1>
-	
+
 	<div class="mb-6">
 		<Input
 			bind:value={searchQuery}
@@ -45,7 +56,7 @@
 			class="mb-4"
 		/>
 	</div>
-	
+
 	{#if loading}
 		<div class="flex justify-center items-center py-12">
 			<Spinner size="12" />
@@ -63,7 +74,7 @@
 					<TableHeadCell>Actions</TableHeadCell>
 				</TableHead>
 				<TableBody class="dark-table-body">
-					{#each searchResponse.popularTitles.edges as { node }}
+					{#each searchResponse.popularTitles.edges as { node } (node.id)}
 						<TableBodyRow class="dark-table-row">
 							<TableBodyCell>
 								<Badge color={node.objectType === 'MOVIE' ? 'blue' : 'green'}>
@@ -92,7 +103,9 @@
 							<TableBodyCell>
 								{#if node.content?.externalIds?.tmdbId}
 									<a
-										href="https://www.themoviedb.org/{node.objectType?.toLowerCase().replace('show', 'tv')}/{node.content.externalIds.tmdbId}"
+										href="https://www.themoviedb.org/{node.objectType
+											?.toLowerCase()
+											.replace('show', 'tv')}/{node.content.externalIds.tmdbId}"
 										target="_blank"
 										rel="noopener noreferrer"
 										class="text-blue-400 hover:text-blue-300 hover:underline"
@@ -104,18 +117,14 @@
 								{/if}
 							</TableBodyCell>
 							<TableBodyCell>
-							<div class="flex gap-2">
-								{#if node.content?.fullPath}
-									<a href="/title/{node.id}" class="inline-block">
-										<Button size="sm" color="blue">
-											View Offers
-										</Button>
-									</a>
-								{:else}
-									<Button size="sm" color="blue" disabled>
-										No Offers
-									</Button>
-								{/if}
+								<div class="flex gap-2">
+									{#if node.content?.fullPath}
+										<a href={resolve('/title/[id]', { id: node.id })} class="inline-block">
+											<Button size="sm" color="blue">View Offers</Button>
+										</a>
+									{:else}
+										<Button size="sm" color="blue" disabled>No Offers</Button>
+									{/if}
 									{#if node.content?.fullPath}
 										<Button
 											size="sm"

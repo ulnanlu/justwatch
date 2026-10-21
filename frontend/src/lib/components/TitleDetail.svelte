@@ -1,84 +1,98 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Card, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Spinner, Button, Badge, Input } from 'flowbite-svelte';
+	import { resolve } from '$app/paths';
+	import {
+		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell,
+		Spinner,
+		Button,
+		Badge,
+		Input
+	} from 'flowbite-svelte';
 	import { justWatchAPI, type TitleNode, type TitleOfferViewModel } from '$lib/api/justwatch';
-	
+
 	export let nodeId: string;
 	export let titleData: TitleNode | null = null;
-	
+
 	let title: TitleNode | null = titleData;
 	let offers: TitleOfferViewModel[] = [];
 	let filteredOffers: TitleOfferViewModel[] = [];
 	let loading = false;
 	let offersLoading = false;
-	
+
 	// Sort state
 	let sortColumn: string = '';
 	let sortDirection: 'asc' | 'desc' = 'asc';
-	
+
 	// Filter state
 	let countryFilter: string = '';
 	let providerFilter: string = '';
 	let typeFilter: string = '';
-	
+
 	// Genre mapping from shortName to full name
 	const genreMap: Record<string, string> = {
-		'act': 'Action',
-		'cmy': 'Comedy',
-		'drm': 'Drama',
-		'hrr': 'Horror',
-		'trl': 'Thriller',
-		'rma': 'Romance',
-		'scf': 'Sci-Fi',
-		'fnt': 'Fantasy',
-		'crm': 'Crime',
-		'wsn': 'Western',
-		'war': 'War',
-		'doc': 'Documentary',
-		'ani': 'Animation',
-		'adv': 'Adventure',
-		'fml': 'Family',
-		'mus': 'Musical',
-		'hst': 'History',
-		'mys': 'Mystery',
-		'bio': 'Biography',
-		'spt': 'Sport',
+		act: 'Action',
+		cmy: 'Comedy',
+		drm: 'Drama',
+		hrr: 'Horror',
+		trl: 'Thriller',
+		rma: 'Romance',
+		scf: 'Sci-Fi',
+		fnt: 'Fantasy',
+		crm: 'Crime',
+		wsn: 'Western',
+		war: 'War',
+		doc: 'Documentary',
+		ani: 'Animation',
+		adv: 'Adventure',
+		fml: 'Family',
+		mus: 'Musical',
+		hst: 'History',
+		mys: 'Mystery',
+		bio: 'Biography',
+		spt: 'Sport'
 	};
-	
+
 	function getGenreName(shortName: string): string {
 		return genreMap[shortName] || shortName.toUpperCase();
 	}
-	
+
 	function formatTechnology(tech: string | undefined): string {
 		if (!tech) return '';
-		
+
 		return tech
 			.split(',')
-			.map(t => t.trim()
-				.replace(/DOLBY_VISION/g, 'Dolby Vision')
-				.replace(/DOLBY_ATMOS/g, 'Dolby Atmos')
-				.replace(/DOLBY_5_POINT_1/g, 'Dolby 5.1')
-				.replace(/_5_POINT_1/g, '5.1ch')
-				.replace(/HDR10_PLUS/g, 'HDR10+')
-				.replace(/HDR10/g, 'HDR10')
-				.replace(/HDR/g, 'HDR')
-				.replace(/_/g, ' ')
+			.map((t) =>
+				t
+					.trim()
+					.replace(/DOLBY_VISION/g, 'Dolby Vision')
+					.replace(/DOLBY_ATMOS/g, 'Dolby Atmos')
+					.replace(/DOLBY_5_POINT_1/g, 'Dolby 5.1')
+					.replace(/_5_POINT_1/g, '5.1ch')
+					.replace(/HDR10_PLUS/g, 'HDR10+')
+					.replace(/HDR10/g, 'HDR10')
+					.replace(/HDR/g, 'HDR')
+					.replace(/_/g, ' ')
 			)
 			.join(', ');
 	}
-	
+
 	function getQualityRank(quality: string | undefined): number {
 		if (!quality) return 0;
-		
+
 		const q = quality.toUpperCase();
-		
+
 		// Higher number = better quality
 		if (q.includes('4K') || q.includes('UHD')) return 5;
 		if (q.includes('HD')) return 4;
 		if (q.includes('SD')) return 3;
 		return 2; // Unknown/other formats
 	}
-	
+
 	function sortOffers(column: string) {
 		if (sortColumn === column) {
 			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -86,11 +100,12 @@
 			sortColumn = column;
 			sortDirection = 'asc';
 		}
-		
+
 		filteredOffers = [...filteredOffers].sort((a, b) => {
-			let aVal: any, bVal: any;
-			
-			switch(column) {
+			let aVal: string | number;
+			let bVal: string | number;
+
+			switch (column) {
 				case 'country':
 					aVal = a.country;
 					bVal = b.country;
@@ -118,33 +133,41 @@
 				default:
 					return 0;
 			}
-			
-			if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-			if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-			return 0;
+
+			let comparison = 0;
+			if (typeof aVal === 'string' && typeof bVal === 'string') {
+				comparison = aVal.localeCompare(bVal);
+			} else if (typeof aVal === 'number' && typeof bVal === 'number') {
+				comparison = aVal - bVal;
+			}
+
+			return sortDirection === 'asc' ? comparison : -comparison;
 		});
 	}
-	
-	function applyFilters() {
-		filteredOffers = offers.filter(offer => {
+
+	function filterOffers(
+		offersToFilter: TitleOfferViewModel[],
+		country: string,
+		provider: string,
+		type: string
+	): TitleOfferViewModel[] {
+		return offersToFilter.filter((offer) => {
 			// Filter out cinema/theatrical releases
 			if (offer.monetizationType === 'CINEMA') return false;
-			
-			const matchCountry = !countryFilter || offer.country.toLowerCase().includes(countryFilter.toLowerCase());
-			const matchProvider = !providerFilter || (offer.packageClearName?.toLowerCase().includes(providerFilter.toLowerCase()) ?? false);
-			const matchType = !typeFilter || (offer.monetizationType?.toLowerCase().includes(typeFilter.toLowerCase()) ?? false);
-			
+
+			const matchCountry = !country || offer.country.toLowerCase().includes(country.toLowerCase());
+			const matchProvider =
+				!provider ||
+				(offer.packageClearName?.toLowerCase().includes(provider.toLowerCase()) ?? false);
+			const matchType =
+				!type || (offer.monetizationType?.toLowerCase().includes(type.toLowerCase()) ?? false);
+
 			return matchCountry && matchProvider && matchType;
 		});
 	}
-	
-	$: {
-		countryFilter;
-		providerFilter;
-		typeFilter;
-		applyFilters();
-	}
-	
+
+	$: filteredOffers = filterOffers(offers, countryFilter, providerFilter, typeFilter);
+
 	onMount(async () => {
 		if (!title && nodeId) {
 			loading = true;
@@ -156,18 +179,15 @@
 				loading = false;
 			}
 		}
-		
+
 		if (title?.content?.fullPath) {
 			offersLoading = true;
 			try {
 				offers = await justWatchAPI.getTitleOffers(title.id, title.content.fullPath);
-				
+
 				// Log unique monetization types for debugging
-				const types = new Set(offers.map(o => o.monetizationType).filter(Boolean));
+				const types = new Set(offers.map((o) => o.monetizationType).filter(Boolean));
 				console.log('Available monetization types:', Array.from(types));
-				
-				// Apply filters immediately after loading
-				applyFilters();
 			} catch (error) {
 				console.error('Failed to load offers:', error);
 			} finally {
@@ -175,21 +195,19 @@
 			}
 		}
 	});
-	
-	function goBack() {
-		window.history.back();
-	}
 </script>
-
 
 <div class="container mx-auto p-6 w-full">
 	<div class="mb-6">
-		<a href="/search" class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">
+		<a
+			href={resolve('/search')}
+			class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+		>
 			<span class="text-xl">←</span>
 			<span>Back to Search</span>
 		</a>
 	</div>
-	
+
 	{#if loading}
 		<div class="flex justify-center items-center py-12">
 			<Spinner size="12" />
@@ -208,7 +226,7 @@
 						/>
 					</div>
 				{/if}
-				
+
 				<!-- Title Info -->
 				<div class="flex-1 space-y-6">
 					<div>
@@ -239,9 +257,11 @@
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
 						{#if title.content.genres && title.content.genres.length > 0}
 							<div>
-								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Genres</h3>
+								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
+									Genres
+								</h3>
 								<div class="flex flex-wrap gap-2">
-									{#each title.content.genres as genre}
+									{#each title.content.genres as genre (genre.shortName)}
 										<Badge color="indigo" class="text-sm">{getGenreName(genre.shortName)}</Badge>
 									{/each}
 								</div>
@@ -250,21 +270,27 @@
 
 						{#if title.content.runtime}
 							<div>
-								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Runtime</h3>
+								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
+									Runtime
+								</h3>
 								<p class="text-white text-lg">{title.content.runtime} minutes</p>
 							</div>
 						{/if}
 
 						{#if title.content.productionCountries && title.content.productionCountries.length > 0}
 							<div>
-								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Countries</h3>
+								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
+									Countries
+								</h3>
 								<p class="text-white text-lg">{title.content.productionCountries.join(', ')}</p>
 							</div>
 						{/if}
 
 						{#if title.content.externalIds}
 							<div>
-								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">External Links</h3>
+								<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
+									External Links
+								</h3>
 								<div class="flex gap-4">
 									{#if title.content.externalIds.imdbId}
 										<a
@@ -278,7 +304,9 @@
 									{/if}
 									{#if title.content.externalIds.tmdbId}
 										<a
-											href="https://www.themoviedb.org/{title.objectType?.toLowerCase().replace('show', 'tv')}/{title.content.externalIds.tmdbId}"
+											href="https://www.themoviedb.org/{title.objectType
+												?.toLowerCase()
+												.replace('show', 'tv')}/{title.content.externalIds.tmdbId}"
 											target="_blank"
 											rel="noopener noreferrer"
 											class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
@@ -293,7 +321,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- Offers Section -->
 		<div class="offers-section w-full">
 			<div class="flex items-center justify-between mb-6">
@@ -304,7 +332,8 @@
 				{#if !offersLoading && offers.length > 0}
 					<div class="flex items-center gap-2">
 						<Badge color="indigo" class="text-base font-semibold">
-							{filteredOffers.length} {filteredOffers.length === 1 ? 'offer' : 'offers'}
+							{filteredOffers.length}
+							{filteredOffers.length === 1 ? 'offer' : 'offers'}
 						</Badge>
 						{#if filteredOffers.length !== offers.length}
 							<span class="text-sm text-gray-400" title="Cinema/theater releases are filtered out">
@@ -314,7 +343,7 @@
 					</div>
 				{/if}
 			</div>
-			
+
 			{#if offersLoading}
 				<div class="flex justify-center items-center py-12">
 					<Spinner size="12" />
@@ -341,12 +370,15 @@
 						class="bg-gray-800 text-white border-gray-600"
 					/>
 				</div>
-				
+
 				<div class="w-full overflow-x-auto rounded-xl">
 					<Table striped={true} hoverable={true} class="dark-table w-full">
 						<TableHead class="dark-table-head">
 							<TableHeadCell>
-								<button on:click={() => sortOffers('country')} class="flex items-center gap-2 hover:text-blue-400">
+								<button
+									on:click={() => sortOffers('country')}
+									class="flex items-center gap-2 hover:text-blue-400"
+								>
 									Country
 									{#if sortColumn === 'country'}
 										<span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -354,7 +386,10 @@
 								</button>
 							</TableHeadCell>
 							<TableHeadCell>
-								<button on:click={() => sortOffers('provider')} class="flex items-center gap-2 hover:text-blue-400">
+								<button
+									on:click={() => sortOffers('provider')}
+									class="flex items-center gap-2 hover:text-blue-400"
+								>
 									Provider
 									{#if sortColumn === 'provider'}
 										<span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -362,7 +397,10 @@
 								</button>
 							</TableHeadCell>
 							<TableHeadCell>
-								<button on:click={() => sortOffers('type')} class="flex items-center gap-2 hover:text-blue-400">
+								<button
+									on:click={() => sortOffers('type')}
+									class="flex items-center gap-2 hover:text-blue-400"
+								>
 									Type
 									{#if sortColumn === 'type'}
 										<span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -370,7 +408,10 @@
 								</button>
 							</TableHeadCell>
 							<TableHeadCell>
-								<button on:click={() => sortOffers('priceLocal')} class="flex items-center gap-2 hover:text-blue-400">
+								<button
+									on:click={() => sortOffers('priceLocal')}
+									class="flex items-center gap-2 hover:text-blue-400"
+								>
 									Price (Local)
 									{#if sortColumn === 'priceLocal'}
 										<span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -378,7 +419,10 @@
 								</button>
 							</TableHeadCell>
 							<TableHeadCell>
-								<button on:click={() => sortOffers('priceUSD')} class="flex items-center gap-2 hover:text-blue-400">
+								<button
+									on:click={() => sortOffers('priceUSD')}
+									class="flex items-center gap-2 hover:text-blue-400"
+								>
 									Price (USD)
 									{#if sortColumn === 'priceUSD'}
 										<span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -386,7 +430,10 @@
 								</button>
 							</TableHeadCell>
 							<TableHeadCell>
-								<button on:click={() => sortOffers('quality')} class="flex items-center gap-2 hover:text-blue-400">
+								<button
+									on:click={() => sortOffers('quality')}
+									class="flex items-center gap-2 hover:text-blue-400"
+								>
 									Quality
 									{#if sortColumn === 'quality'}
 										<span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -397,14 +444,20 @@
 							<TableHeadCell>Link</TableHeadCell>
 						</TableHead>
 						<TableBody class="dark-table-body">
-							{#each filteredOffers as offer}
+							{#each filteredOffers as offer (offer.offerDetails.id)}
 								<TableBodyRow class="dark-table-row">
-								<TableBodyCell>
-									<Badge color="gray">{offer.country}</Badge>
-								</TableBodyCell>
+									<TableBodyCell>
+										<Badge color="gray">{offer.country}</Badge>
+									</TableBodyCell>
 									<TableBodyCell>{offer.packageClearName || 'N/A'}</TableBodyCell>
 									<TableBodyCell>
-										<Badge color={offer.monetizationType === 'BUY' ? 'blue' : offer.monetizationType === 'RENT' ? 'yellow' : 'green'}>
+										<Badge
+											color={offer.monetizationType === 'BUY'
+												? 'blue'
+												: offer.monetizationType === 'RENT'
+													? 'yellow'
+													: 'green'}
+										>
 											{offer.monetizationType || 'N/A'}
 										</Badge>
 									</TableBodyCell>
@@ -422,7 +475,8 @@
 										<div class="text-xs">
 											{offer.presentationType?.replace('_4K', '4K') || 'N/A'}
 											{#if offer.technology}
-												<br /><span class="text-gray-400">{formatTechnology(offer.technology)}</span>
+												<br /><span class="text-gray-400">{formatTechnology(offer.technology)}</span
+												>
 											{/if}
 										</div>
 									</TableBodyCell>
@@ -460,9 +514,7 @@
 				<div class="no-offers-card">
 					<div class="text-center py-12">
 						<span class="text-6xl mb-4 block">🎭</span>
-						<p class="text-xl text-gray-300">
-							No streaming offers available for this title.
-						</p>
+						<p class="text-xl text-gray-300">No streaming offers available for this title.</p>
 					</div>
 				</div>
 			{/if}
@@ -482,7 +534,9 @@
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 1rem;
 		padding: 2rem;
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.3),
+			0 10px 10px -5px rgba(0, 0, 0, 0.2);
 	}
 
 	.offers-section {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TitleDetail from '$lib/components/TitleDetail.svelte';
 	import { page } from '$app/stores';
-	
+
 	$: nodeId = $page.params.id || '';
 </script>
 

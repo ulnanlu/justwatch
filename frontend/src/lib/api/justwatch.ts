@@ -70,7 +70,7 @@ export interface OfferDetails {
 	package?: OfferPackage;
 	standardWebURL?: string;
 	elementCount?: number;
-	availableTo?: any;
+	availableTo?: unknown;
 	deeplinkRoku?: string;
 	subtitleLanguages?: string[];
 	videoTechnology?: string[];
@@ -101,7 +101,9 @@ class JustWatchAPI {
 	}
 
 	async searchTitles(query: string, country: string = 'US'): Promise<SearchTitlesResponse> {
-		const response = await fetch(`${this.baseUrl}/search?q=${encodeURIComponent(query)}&country=${country}`);
+		const response = await fetch(
+			`${this.baseUrl}/search?q=${encodeURIComponent(query)}&country=${country}`
+		);
 		if (!response.ok) {
 			throw new Error(`Search failed: ${response.statusText}`);
 		}
@@ -117,7 +119,9 @@ class JustWatchAPI {
 	}
 
 	async getTitleOffers(nodeId: string, path: string): Promise<TitleOfferViewModel[]> {
-		const response = await fetch(`${this.baseUrl}/offers/${nodeId}?path=${encodeURIComponent(path)}`);
+		const response = await fetch(
+			`${this.baseUrl}/offers/${nodeId}?path=${encodeURIComponent(path)}`
+		);
 		if (!response.ok) {
 			throw new Error(`Failed to get offers: ${response.statusText}`);
 		}
